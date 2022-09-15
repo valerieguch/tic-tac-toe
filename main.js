@@ -9,6 +9,8 @@ const SIZE_WIN = 6;  // Row length needed to win
 const WIDTH    = 850;          // canvas width in px, TODO hardcode
 const CELL_W   = WIDTH / SIZE; // width of one cell in px
 
+const nextPlayer = getNextPlayer666;
+
 const cell = {
   Empty: 0,
   X:     1,
@@ -208,10 +210,10 @@ function handleClick(x, y) {
   else if (freeCellsNum === 0)
     updatePage("Ничья!");
   else
-    updatePage(`Ход игрока ${getNextPlayer666() === cell.X ? "X" : "O"}`);
+    updatePage(`Ход игрока ${nextPlayer() === cell.X ? "X" : "O"}`);
 
   // currentPlayer = getNextPlayer();
-  currentPlayer = getNextPlayer666();
+  currentPlayer = nextPlayer();
 }
 
 function updateState() {
@@ -223,7 +225,7 @@ function updateState() {
     drawCircle(row, col);
   }
 
-  // currentPlayer = getNextPlayer666();
+  // currentPlayer = nextPlayer();
 }
 
 function reset() {
@@ -231,7 +233,7 @@ function reset() {
   console.log(board);
   drawEmptyField();
   currentPlayer = cell.X; // TODO maybe make this customizable
-  updatePage(`Ход игрока ${getNextPlayer666() === cell.X ? "X" : "O"}`);
+  updatePage(`Ход игрока ${nextPlayer() === cell.X ? "X" : "O"}`);
 }
 
 function updatePage(info) {
