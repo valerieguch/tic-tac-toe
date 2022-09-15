@@ -3,19 +3,25 @@
 // - canvas is square
 // - X always makes a move first (TODO unnecessary limitation)
 
+// TODO maybe not const?
 const SIZE     = 19; // Number of rows (equal to columns)
 const SIZE_WIN = 6;  // Row length needed to win
 
-const WIDTH    = 850;          // canvas width in px, TODO hardcode
+const WIDTH    = 850;          // canvas width in px
 const CELL_W   = WIDTH / SIZE; // width of one cell in px
-
-const nextPlayer = getNextPlayer666;
 
 const cell = {
   Empty: 0,
   X:     1,
   O:     2,
 };
+
+const state = {
+  Playing: 0,
+  End:     1
+}
+
+const getNextPlayer = cycle([cell.X, cell.O, cell.O, cell.X]);
 
 const canvas = document.querySelector("#board");
 const ctx    = canvas.getContext("2d");
@@ -26,7 +32,8 @@ canvas.height = WIDTH;
 // Mutable state
 const board = new Uint8Array(SIZE * SIZE).fill(cell.Empty);
 
-let currentPlayer = cell.X;
+let currentPlayer = getNextPlayer();
+let currentState  = state.Playing;
 let freeCellsNum  = SIZE * SIZE;
 
 // TODO which is better?
@@ -42,6 +49,20 @@ canvas.addEventListener("mousedown", (e) => {
   const y    = e.clientY - rect.top;
   handleClick(x, y);
 });
+
+// Returns a function that generates the next move each time it's called, e.g.
+// cell.X, cell.O, cell.X, cell.O, ...
+function cycle(sequence) {
+  function* generator(s) {
+    while (true) {
+      for (let i = 0; i < s.length; i++)
+        yield s[i];
+    }
+  }
+
+  const g = generator(sequence);
+  return () => g.next().value;
+}
 
 function drawEmptyField() {
   ctx.save();
@@ -135,17 +156,21 @@ function drawLine([row1, col1, row2, col2]) {
   ctx.restore();
 }
 
+function getCell(row, col) {
+  return board[row * SIZE + col];
+}
+
 function checkCombo(row, col, rowInc, colInc) {
   function outOfBorders(row, col) {
     return (row < 0 || col < 0 || row >  SIZE - 1 || col > SIZE - 1);
   }
 
-  player = board[row * SIZE + col];
+  playerCell = getCell(row, col);
 
   // TODO hard to reason about
   // If we can move to a cell and that cell is player, move here
   while (!outOfBorders(row - rowInc, col - colInc) &&
-         board[(row - rowInc) * SIZE + (col - colInc)] === player) {
+         getCell(row - rowInc, col - colInc) === playerCell) {
     row -= rowInc;
     col -= colInc;
   }
@@ -156,7 +181,7 @@ function checkCombo(row, col, rowInc, colInc) {
   let combo = 0;
 
   // If this cell is valid and is player, move further, increase combo
-  while (!outOfBorders(row, col) && board[row * SIZE + col] === player) {
+  while (!outOfBorders(row, col) && getCell(row, col) === playerCell) {
     combo++;
     row += rowInc;
     col += colInc;
@@ -178,45 +203,33 @@ function checkWin(row, col) {
           checkCombo(row, col, -1, 1));
 }
 
-function getNextPlayer666() {
-  const movesMade = SIZE * SIZE - freeCellsNum;
-  if (Math.floor((movesMade - 1) / 2) % 2 === 0)
-    return cell.O;
-  return cell.X;
-}
-
-function getNextPlayer() {
-  if (currentPlayer === cell.X)
-    return cell.O;
-  return cell.X;
-}
-
 function handleClick(x, y) {
+  if (currentState !== state.Playing)
+    return;
   [row, col] = getCellPos(x, y);
-  console.log(`x: ${x}, y: ${y}, row: ${row}, col: ${col}`);
+  // console.log(`x: ${x}, y: ${y}, row: ${row}, col: ${col}`);
 
-  if (board[row * SIZE + col] !== cell.Empty)
+  if (getCell(row, col) !== cell.Empty)
     return;
 
-  board[row * SIZE + col] = currentPlayer;
-
-  updateState();
+  udpate();
 
   let victoryLine = null;
   if ((victoryLine = checkWin(row, col))) {
     updatePage(`Победа игрока ${currentPlayer === cell.X ? "X" : "O"}`);
     drawLine(victoryLine);
+    currentState = state.End;
   }
-  else if (freeCellsNum === 0)
+  else if (freeCellsNum === 0) {
     updatePage("Ничья!");
+    currentState = state.End;
+  }
   else
-    updatePage(`Ход игрока ${nextPlayer() === cell.X ? "X" : "O"}`);
-
-  // currentPlayer = getNextPlayer();
-  currentPlayer = nextPlayer();
+    updatePage(`Ход игрока ${currentPlayer === cell.X ? "X" : "O"}`);
 }
 
-function updateState() {
+function udpate() {
+  board[row * SIZE + col] = currentPlayer;
   freeCellsNum--;
 
   if (currentPlayer === cell.X) {
@@ -224,8 +237,7 @@ function updateState() {
   } else {
     drawCircle(row, col);
   }
-
-  // currentPlayer = nextPlayer();
+  currentPlayer = getNextPlayer();
 }
 
 function reset() {
@@ -233,7 +245,7 @@ function reset() {
   console.log(board);
   drawEmptyField();
   currentPlayer = cell.X; // TODO maybe make this customizable
-  updatePage(`Ход игрока ${nextPlayer() === cell.X ? "X" : "O"}`);
+  updatePage(`Ход игрока ${getNextPlayer() === cell.X ? "X" : "O"}`); // TODO don't
 }
 
 function updatePage(info) {
