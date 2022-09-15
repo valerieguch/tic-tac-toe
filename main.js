@@ -169,7 +169,7 @@ function checkCombo(row, col, rowInc, colInc) {
   return [startRow, startCol, endRow, endCol];
 }
 
-function checkVictory(row, col) {
+function checkWin(row, col) {
   return (checkCombo(row, col, 1, 0) ||
           checkCombo(row, col, 0, 1) ||
           checkCombo(row, col, 1, 1) ||
@@ -201,7 +201,7 @@ function handleClick(x, y) {
   updateState();
 
   let victoryLine = null;
-  if ((victoryLine = checkVictory(row, col))) {
+  if ((victoryLine = checkWin(row, col))) {
     updatePage(`Победа игрока ${currentPlayer === cell.X ? "X" : "O"}`);
     drawLine(victoryLine);
   }
