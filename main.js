@@ -185,7 +185,7 @@ function getNextPlayer666() {
 
 function getNextPlayer() {
   if (currentPlayer === cell.X)
-    return cell.Y;
+    return cell.O;
   return cell.X;
 }
 
