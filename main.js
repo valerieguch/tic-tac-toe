@@ -18,6 +18,9 @@ const cell = {
 const canvas = document.querySelector("#board");
 const ctx    = canvas.getContext("2d");
 
+canvas.width  = WIDTH;
+canvas.height = WIDTH;
+
 // Mutable state
 const board = new Uint8Array(SIZE * SIZE).fill(cell.Empty);
 
