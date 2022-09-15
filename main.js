@@ -72,7 +72,7 @@ function drawEmptyField() {
 function drawCross(row, col) {
   ctx.save();
 
-  ctx.lineWidth   = 5;
+  ctx.lineWidth   = CELL_W / 10;
   ctx.strokeStyle = "#66b3ff";
   ctx.lineCap     = "round";
 
@@ -95,7 +95,7 @@ function drawCross(row, col) {
 function drawCircle(row, col) {
   ctx.save();
 
-  ctx.lineWidth   = 5;
+  ctx.lineWidth   = CELL_W / 10;
   ctx.strokeStyle = "#ffaa80";
 
   const x      = CELL_W * (col + 1) - (CELL_W / 2);
@@ -111,11 +111,11 @@ function drawCircle(row, col) {
 function drawLine([row1, col1, row2, col2]) {
   ctx.save();
 
-  ctx.lineWidth   = 6;
+  ctx.lineWidth   = CELL_W / 10;
   ctx.strokeStyle = "red";
   ctx.lineCap     = "round";
 
-  const offset    = CELL_W / 3;
+  const offset    = CELL_W / 2.5;
 
   const x1 = CELL_W * (col1 + 1) - (CELL_W / 2);
   const y1 = CELL_W * (row1 + 1) - (CELL_W / 2);
